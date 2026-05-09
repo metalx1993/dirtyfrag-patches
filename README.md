@@ -6,6 +6,18 @@ Dirty Frag allows an unprivileged local user to overwrite arbitrary bytes of the
 
 ---
 
+## ⚠️ Attribution
+
+> **The patches in this repository were NOT written by the maintainer of this repo.**
+>
+> - **CVE-2026-43284 (ESP patch):** authored by [Hyunwoo Kim (@v4bel)](https://x.com/v4bel) and [Kuan-Ting Chen](https://lore.kernel.org/all/20260504073403.38854-1-h3xrabbit@gmail.com/). Merged into the Linux kernel mainline at commit [`f4c50a4034e6`](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=f4c50a4034e62ab75f1d5cdd191dd5f9c77fdff4).
+> - **CVE-2026-43500 (RxRPC patch):** authored by [Hyunwoo Kim (@v4bel)](https://x.com/v4bel). Submitted to the netdev mailing list at [`afKV2zGR6rrelPC7@v4bel`](https://lore.kernel.org/all/afKV2zGR6rrelPC7@v4bel/), pending merge.
+>
+> This repository is a **formatted mirror** of those patches, collected here for convenience in `git am`-ready format.
+> All credit goes to the original authors. Original research and PoC: https://github.com/V4bel/dirtyfrag
+
+---
+
 ## Patches
 
 | File | CVE | Subsystem | Status |
@@ -71,14 +83,14 @@ Both variants share the same root cause: the kernel's zero-copy `splice()` path 
 splice(file_fd → pipe → socket)
          │
          ▼
-  skb->frags[0].page = &page_cache_page_P   ← no CoW!
+  skb->frags[0].page = &page_cache_page_P   <- no CoW!
          │
          ▼
   [esp_input / rxkad_verify_packet_1]
   in-place AEAD/fcrypt decrypt  src == dst == &P
          │
          ▼
-  STORE to page_cache_page_P     ← arbitrary write to read-only file cache
+  STORE to page_cache_page_P     <- arbitrary write to read-only file cache
 ```
 
 ### Fix Strategy
